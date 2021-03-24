@@ -1,6 +1,9 @@
 {
   "name": "nodejs-lessons",
   "version": "1.0.0",
+  "scripts": {
+    "run": "node server.js"
+  },
   "dependencies": {
     "express": "^4.17.1",
     "fs-extra": "^9.1.0"
