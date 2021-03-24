@@ -1,42 +1,20 @@
-//3.Գրել ծրագիր, որը կկարդա homework3.txt ֆայլի պարունակությունը, տեքստից կհեռացնի  ստորակետները
-// և կգրի replace.txt ֆայլում, որից հետո ջնջել homework3.txt ֆայլը:
-const fs = require('fs');
-const {Transform} = require('stream');
+//3. Server-ում ունենք users.json ֆայլ, որը զանգված է կազմված "fisrt_name", "last_name", "email", "age" դաշտեր պարունակող օբյեկտներից ։
+// Ստեղծել սերվեր, որին հարցում ուղարկելիս եթե կա query-ի մեջ filter դաշտը , վերադարձնել users.json-ից զանգված միայն այն օբյեկներից ,
+// որոնց "fisrt_name" կամ "last_name" պարունակում է filter-ի արժեքը։
+const http = require('http');
+const url = require('url');
+const users = require('./users.json');
 
-async function removeCommasWithStream() {
-    const readStream = fs.createReadStream('./homework3.txt');
-    const writeStream = fs.createWriteStream('./replace.txt');
-
-    const transform = new Transform({
-        transform(chunk, encoding, callback) {
-            this.push(chunk.toString().replace(/\,/g, ''));
-            callback();
-        }
-    });
-
-    readStream.pipe(transform).pipe(writeStream);
-
-    readStream.on('end', () => {
-
-    }).on('error', (err) => {
-        console.log(err);
-    }).on('data', (chunk)=>{
-        console.log(chunk.toString());
-    });
-
-    writeStream.on('finish', () => {
-        fs.unlink('./homework3.txt', (err) => {
-
-        });
-    });
-}
-
-async function removeCommas() {
-    const data = await fs.promises.readFile('./homework3.txt');
-    await fs.promises.writeFile('./replace.txt', data.toString().replace(/\,/g, ''));
-    await fs.promises.unlink('./homework3.txt');
-}
-
-removeCommasWithStream().then().catch((err) => {
-    console.error(err)
-});
+http.createServer((request, response) => {
+    const urlData = url.parse(request.url, true);
+    if (urlData.pathname === '/users') {
+        response.writeHead(200, {
+            'Content-Type': 'application/json'
+        })
+        response.end(JSON.stringify(users.filter(user => {
+            return !urlData.query.filter || user.first_name.includes(urlData.query.filter) || user.last_name.includes(urlData.query.filter);
+        })));
+    } else {
+        response.end();
+    }
+}).listen(3000);

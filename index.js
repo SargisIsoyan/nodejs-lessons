@@ -1,29 +1,19 @@
-const http = require('http');
-const url = require('url');
 const fs = require('fs');
+const {EventEmitter} = require('events');
 
+const read = fs.createReadStream('sunny.txt').on('data', (chunk) => {
+    console.log('log1', chunk.toString());
+}).on('data', ()=>{
+    console.log('log2');
+});
+read.emit('data', 'test');
 
-const server = http.createServer((req, res) => {
-    // console.log(req.method);
-    // for (let key in req.headers) {
-    //     console.log("headers key:value  is  " + key + ":" + req.headers[key]);
-    // }
-    //
-    // res.statusCode = 403;
-    // const urlData = url.parse(req.url, {parseQueryString: true});
-    // console.log(urlData.query.user);
-    // process.stdin.on('data', (chunk) => {
-    //     res.write(chunk);
-    // }).on('end', () => {
-    //     res.end();
-    // });
-    // res.end(new Date().getSeconds().toString());
-    fs.createReadStream('./image.jpg', {highWaterMark: 10}).on('data', (chunk) => {
-        res.write(chunk);
-    }).on('end', () => {
-        res.write(null); // res.end()
-    })
+const event = new EventEmitter();
+
+event.on('click', (number) => {
+    console.log('click 1', number);
+}).on('click', (number) => {
+    console.log('click 2', number);
 });
 
-
-server.listen(2021);
+event.emit('click', 10);

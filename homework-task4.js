@@ -1,17 +1,31 @@
-// 4.Ունենք const web=['html','css','js','txt'] զանգված: Գրել ծրագի որ կստեղծի զանգվածի անունով պապկա:
-// Զանգվածի անդամներից այդ պապկայում ստեղծել  ֆայլեր հերթական անդամի անունով և վերջավորությունն էլ նույնը լինի(օրինակ html.html)
-// պարունակություն էլ այդ անդամը:
-const fs = require('fs').promises;
+//4․ Ստեղծել myMap մեթոդ Array-ի համարար , որը կաշխատի ինչպես map մեթոդը. [].map(fn) -ը կարողանանք գրել [].myMap(fn) -ի միջոցով ։
 
-async function createDir(dirName, arr) {
-    await fs.mkdir(dirName);
-    const promises = arr.map(item => fs.writeFile(dirName + '/' + item + '.' + item, item));
-    //const promises = [];
-    // for (let item of arr) {
-    //     promises.push(fs.writeFile(dirName + '/' + item + '.' + item, item));
-    // }
+Array.prototype.myMap = function (fn) {
+    const arr = [];
+    for (let i = 0; i < this.length; i++) {
+        arr.push(fn(this[i], i, this));
+    }
+    return arr;
+};
 
-    await Promise.all(promises);
+console.log([1, 2, 3].myMap(function (value, index, array) {
+    return value * 2;
+}));
+
+console.log([1, 2, 3].map(function (value, index, array) {
+    return value * 2;
+}));
+
+async function foo() {
+    [1, 2, 3].forEach((value, index, array) => {
+        new Promise(() => {
+            return new Promise(() => 1);
+        }).then()
+    });
+    await Promise.all([1, 2, 3].map(async function (value, index, array) {
+        await new Promise(() => 1);
+        return value * 2;
+    }));
 }
 
-createDir('web', ['html', 'css', 'js', 'txt']).then().catch(err => console.error(err));
+foo().catch();

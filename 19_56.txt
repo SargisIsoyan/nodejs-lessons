@@ -1,7 +1,0 @@
-{
-  "uid": -1,
-  "gid": -1,
-  "username": "sargi",
-  "homedir": "C:\\Users\\sargi",
-  "shell": null
-}
