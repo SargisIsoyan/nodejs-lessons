@@ -4,6 +4,9 @@ const router = require('./router');
 
 const app = express();
 
+app.use(express.urlencoded({extended: false}));
+app.use(express.json());
+
 app.set('port', 2021);
 router(app);
 

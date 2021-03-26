@@ -1,7 +1,9 @@
+const homework = require('../homework-task1');
 const express = require('express');
 const router = express.Router();
 
-router.get('/', (req, res) => {
+router.get('/homeworks', (req, res) => {
+    homework.emit('homework');
     res.end('users data');
 });
 

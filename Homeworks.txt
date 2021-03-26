@@ -1,0 +1,4 @@
+1.  Ստեղծել homework իրադարձությունը լսող , որը կկանչի handler :
+handler-ը պետք է արտածի Homeworks.txt պարունակությունը: emit անել homework :
+
+2. Ստեղծել express framework-ով web aplication : Ստեղծել /posts route , որին կարող են կատարել GET, POST , PUT և DETELE մեթոդներով request-ներ ։ Բոլորի դեպքում վերադարձնում որպես response ժամը և մեթոդի անունը։
