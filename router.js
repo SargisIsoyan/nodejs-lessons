@@ -6,6 +6,7 @@ module.exports = (app) => {
     });
     app.use('/users', require('./routers/users'));
     app.use('/posts', require('./routers/posts'));
+    app.use('/upload', require('./routers/upload'));
     app.use('/', require('./routers/index'));
     app.use((req, res) => {
         res.end('route not found');
