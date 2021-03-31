@@ -2,6 +2,8 @@
 // պահպանելիս ընտրել պատահական 6-անիշ թվերից կազմված անուն:
 const express = require('express');
 const random = require('random');
+const fs = require('fs');
+const path = require('path');
 const multer = require('multer');
 const mime = require('mime-types');
 
@@ -21,6 +23,10 @@ const upload = multer({dest: 'test/'});
 
 router.post('/', upload.single('file'), (req, res) => {
     res.json(req.file);
+});
+
+router.get('/:name', upload.single('file'), (req, res) => {
+    fs.createReadStream(path.join(__homedir, 'upload', req.params.name)).pipe(res);
 });
 
 module.exports = router;

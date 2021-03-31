@@ -10,65 +10,63 @@ const path = require('path');
 const fs = require('fs').promises;
 const router = express.Router();
 const upload = require('../middlewares/upload');
+const Users = require('../models/users');
 
 router.route('/').get(async (req, res) => {
-    let users = Object.values(JSON.parse(await fs.readFile(__dirname + './../users.json', 'utf-8')));
-
+    const options = {};
     if (req.query.name) {
-        users = users.filter(user => user.name.includes(req.query.name));
+        options.name = req.query.name;
     }
-    if (req.query.limit) {
-        users = users.slice(0, req.query.limit);
-    }
+    const users = await Users.find(options);
+
+    // if (req.query.limit) {
+    //     users = users.slice(0, req.query.limit);
+    // }
 
     res.json(users);
 }).post(upload.single('image'), async (req, res) => {
     const {username, name} = req.body;
-    const userData = JSON.parse(await fs.readFile(__dirname + './../users.json', 'utf-8'));
-
-    if (userData[username]) {
-        await fs.unlink(path.join(__homedir, req.file.path));
-        res.status(400).json({
-            success: false,
-            data: null,
-            message: 'user exists'
-        });
-    } else {
-        userData[username] = {
-            username,
-            name,
-            image: req.file.path
-        }
-        await fs.writeFile(__dirname + './../users.json', JSON.stringify(userData));
-        res.json({
-            success: true,
-            data: userData[username],
-            message: 'user created'
-        });
+    if(await Users.exists({username})){
+        throw new Error('User exists');
     }
+    const user = new Users();
+    user.image = req.file.path;
+    user.username = username;
+    user.name = name;
+
+    await user.save();
+
+    res.json({
+        success: true,
+        data: user,
+        message: 'user created'
+    });
 });
 
-router.route('/:username').get(async (req, res) => {
-    const usersData = JSON.parse(await fs.readFile(__dirname + './../users.json', 'utf-8'));
-
-    res.json(usersData[req.params.username]);
+router.route('/:id').get(async (req, res) => {
+    const user = await Users.findOne({
+        _id: req.params.id
+    });
+    res.json(user);
 }).put(upload.single('image'), async (req, res) => {
-    const usersData = JSON.parse(await fs.readFile(__dirname + './../users.json', 'utf-8'));
+    const user = await Users.findOne({_id: req.params.id});
 
     if (req.body.name) {
-        usersData[req.params.username]['name'] = req.body.name;
+        user['name'] = req.body.name;
     }
     if (req.file) {
-        await fs.unlink(path.join(__homedir, usersData[req.params.username]['image']));
-        usersData[req.params.username]['image'] = req.file.path;
+        await fs.unlink(path.join(__homedir, user['image']));
+        user['image'] = req.file.path;
     }
-    await fs.writeFile(__dirname + './../users.json', JSON.stringify(usersData));
+    await user.save();
 
-    res.json(usersData[req.params.username]);
+    res.json(user);
 }).delete(async (req, res) => {
-    const usersData = JSON.parse(await fs.readFile(__dirname + './../users.json', 'utf-8'));
-    delete usersData[req.params.username];
-    await fs.writeFile(__dirname + './../users.json', JSON.stringify(usersData));
+    const user = await Users.findOne({_id: req.params.id});
+
+    if(user){
+        await user.remove();
+    }
     res.json({
         success: true
     });
