@@ -9,8 +9,7 @@ global.__homedir = __dirname;
 app.use(cors());
 app.use(express.urlencoded({extended: false}));
 app.use(express.json());
-// SQL  MySQL , PostgreSQL , MsSQL , SQL lite
-// nosql  MongoDB , Redis
+
 app.set('port', 2021);
 router(app);
 

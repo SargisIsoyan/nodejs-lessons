@@ -11,6 +11,11 @@ const fs = require('fs').promises;
 const router = express.Router();
 const upload = require('../middlewares/upload');
 const Users = require('../models/users');
+const UsersCtrl = require('../controllers/users-ctrl');
+const ResponseManager = require('../managers/response_manager');
+const {check, body} = require('express-validator');
+const validationResult = require('../middlewares/validation_result');
+
 
 router.route('/').get(async (req, res) => {
     const options = {};
@@ -24,30 +29,36 @@ router.route('/').get(async (req, res) => {
     // }
 
     res.json(users);
-}).post(upload.single('image'), async (req, res) => {
-    const {username, name} = req.body;
-    if(await Users.exists({username})){
-        throw new Error('User exists');
-    }
-    const user = new Users();
-    user.image = req.file.path;
-    user.username = username;
-    user.name = name;
-
-    await user.save();
-
-    res.json({
-        success: true,
-        data: user,
-        message: 'user created'
+}).post(
+    upload.single('image'),
+    check('username').custom(value => {
+        return value && value.length > 0
+    }),
+    body('name').exists().notEmpty().isLength({min: 6, max: 20}),
+    validationResult,
+    async (req, res) => {
+        const responseHandler = ResponseManager.getResponseHandler(res);
+        try {
+            const {username, name} = req.body;
+            const createdUser = await UsersCtrl.add({
+                file: req.file,
+                username,
+                name
+            });
+            responseHandler.onSuccess(createdUser, 'User is created');
+        } catch (e) {
+            responseHandler.onError(e);
+        }
     });
-});
 
 router.route('/:id').get(async (req, res) => {
-    const user = await Users.findOne({
-        _id: req.params.id
-    });
-    res.json(user);
+    const responseHandler = ResponseManager.getResponseHandler(res);
+    try {
+        const user = await UsersCtrl.getById(req.params.id);
+        responseHandler.onSuccess(user);
+    } catch (e) {
+        responseHandler.onError(e);
+    }
 }).put(upload.single('image'), async (req, res) => {
     const user = await Users.findOne({_id: req.params.id});
 
@@ -64,7 +75,7 @@ router.route('/:id').get(async (req, res) => {
 }).delete(async (req, res) => {
     const user = await Users.findOne({_id: req.params.id});
 
-    if(user){
+    if (user) {
         await user.remove();
     }
     res.json({

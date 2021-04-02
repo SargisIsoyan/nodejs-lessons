@@ -4,7 +4,6 @@ const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
 const UsersSchema = new Schema({
-    id: ObjectId,
     username: {type: String, required: true, unique: true},
     name: String,
     image: String

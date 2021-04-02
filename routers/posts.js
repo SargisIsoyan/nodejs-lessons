@@ -1,30 +1,27 @@
-//2. Ստեղծել express framework-ով web aplication : Ստեղծել /posts route , որին կարող են կատարել GET, POST , PUT և DETELE մեթոդներով request-ներ ։
-// Բոլորի դեպքում վերադարձնում որպես response ժամը և մեթոդի անունը։
-//
-
 const express = require('express');
 const router = express.Router();
 const upload = require('../middlewares/upload');
+const Posts = require('../models/posts');
+const Users = require('../models/users');
 
-router.route('/').get((req, res) => {
-    console.log(req.query.limit);
-    console.log(req.query);
-    res.end(new Date().toDateString() + ' GET get all posts');
-}).post(upload.array('photos', 2), (req, res) => {
-    console.log(req.body.name);
-    console.log(req.body.lastName);
-    console.log(req.files);
-    res.json({
-        name: req.body.name,
-        lastName: req.body.lastName,
-        isNuynObject: req['NuynObject']
+router.route('/').get(async (req, res) => {
+    const posts = await Posts.find().populate({
+        path: 'author',
+        select: '-_id -image'
     });
-});
+    res.json(posts);
+}).post(async (req, res) => {
+    if(!(await Users.exists({_id:req.body.userId}))){
+        throw new Error('User not found');
+    }
 
-router.route('/').put((req, res) => {
-    res.end(new Date().toDateString() + ' PUT update post');
-}).delete((req, res) => {
-    res.end(new Date().toDateString() + ' DELETE delete post');
+    const post = new Posts({
+        author: req.body.userId,
+        title: req.body.title,
+        body: req.body.body
+    });
+    await post.save();
+    res.json(post);
 });
 
 router.route('/:id').get((req, res) => {
