@@ -1,15 +1,17 @@
 const Users = require('../models/users');
 const AppError = require('../managers/app_error');
+const Bcrypt = require('../managers/bcrypt');
 
 class UsersCtrl {
     async add(data) {
-        const {username, name, file: {path}} = data;
+        const {username, name, file, password} = data;
         if (await Users.exists({username})) {
             throw new AppError('User exists', 400);
         }
         const user = new Users();
         user.username = username;
-        user.image = path;
+        user.password = await Bcrypt.hash(password);
+        user.image = file?.path;
         user.name = name;
 
         return user.save();
@@ -17,6 +19,10 @@ class UsersCtrl {
 
     async getById(id) {
         return Users.findOne({_id: id});
+    }
+
+    async getOne(options) {
+        return Users.findOne(options);
     }
 
     update() {

@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const upload = require('../middlewares/upload');
+const responseHandler = require('../middlewares/response-handler');
+const validateToken = require('../middlewares/validate-token');
 const Posts = require('../models/posts');
 const Users = require('../models/users');
 
@@ -10,19 +12,23 @@ router.route('/').get(async (req, res) => {
         select: '-_id -image'
     });
     res.json(posts);
-}).post(async (req, res) => {
-    if(!(await Users.exists({_id:req.body.userId}))){
-        throw new Error('User not found');
-    }
+}).post(
+    responseHandler,
+    validateToken,
+    async (req, res) => {
+        if (!(await Users.exists({_id: req.decoded.userId}))) {
+            throw new Error('User not found');
+        }
 
-    const post = new Posts({
-        author: req.body.userId,
-        title: req.body.title,
-        body: req.body.body
-    });
-    await post.save();
-    res.json(post);
-});
+        const post = new Posts({
+            author: req.decoded.userId,
+            title: req.body.title,
+            body: req.body.body
+        });
+        await post.save();
+        res.json(post);
+    }
+);
 
 router.route('/:id').get((req, res) => {
     res.end('get ' + req.params.id);

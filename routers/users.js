@@ -15,6 +15,7 @@ const UsersCtrl = require('../controllers/users-ctrl');
 const ResponseManager = require('../managers/response_manager');
 const {check, body} = require('express-validator');
 const validationResult = require('../middlewares/validation_result');
+const responseHandler = require('../middlewares/response-handler');
 
 
 router.route('/').get(async (req, res) => {
@@ -30,6 +31,7 @@ router.route('/').get(async (req, res) => {
 
     res.json(users);
 }).post(
+    responseHandler,
     upload.single('image'),
     check('username').custom(value => {
         return value && value.length > 0
@@ -37,7 +39,6 @@ router.route('/').get(async (req, res) => {
     body('name').exists().notEmpty().isLength({min: 6, max: 20}),
     validationResult,
     async (req, res) => {
-        const responseHandler = ResponseManager.getResponseHandler(res);
         try {
             const {username, name} = req.body;
             const createdUser = await UsersCtrl.add({
@@ -45,9 +46,9 @@ router.route('/').get(async (req, res) => {
                 username,
                 name
             });
-            responseHandler.onSuccess(createdUser, 'User is created');
+            res.onSuccess(createdUser, 'User is created');
         } catch (e) {
-            responseHandler.onError(e);
+            res.onError(e);
         }
     });
 

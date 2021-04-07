@@ -4,6 +4,7 @@ module.exports = (app) => {
         req['NuynObject'] = true;
         next();
     });
+    app.use('/auth', require('./routers/auth'));
     app.use('/users', require('./routers/users'));
     app.use('/posts', require('./routers/posts'));
     app.use('/upload', require('./routers/upload'));
