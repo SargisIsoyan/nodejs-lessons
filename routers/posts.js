@@ -26,7 +26,7 @@ router.route('/').get(async (req, res) => {
             body: req.body.body
         });
         await post.save();
-        res.json(post);
+        res.onSuccess(post);
     }
 );
 

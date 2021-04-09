@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const responseHandler = require('../middlewares/response-handler');
+const validateToken = require('../middlewares/validate-token');
 const {body} = require('express-validator');
 const validationResult = require('../middlewares/validation_result');
 const AuthCtrl = require('../controllers/auth-ctrl');
+const UserCtrl = require('../controllers/users-ctrl');
 
 router.post(
     '/register',
@@ -32,6 +34,20 @@ router.post(
         try {
             const token = await AuthCtrl.login(req.body);
             res.onSuccess(token);
+        } catch (e) {
+            res.onError(e);
+        }
+    }
+);
+
+router.post(
+    '/init-session',
+    responseHandler,
+    validateToken,
+    async (req, res) => {
+        try {
+            const user = await UserCtrl.getById(req.decoded.userId)
+            res.onSuccess(user);
         } catch (e) {
             res.onError(e);
         }
