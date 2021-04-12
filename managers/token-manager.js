@@ -2,9 +2,9 @@ const jwt = require('jsonwebtoken');
 const {privateKey} = require('../configs/private-key');
 
 class TokenManager{
-    encode(data){
+    encode(data, expiresIn = 60 * 60 * 24){
         return jwt.sign(data,privateKey, {
-            expiresIn: 60 * 60 * 24
+            expiresIn
         });
     }
     decode(token){

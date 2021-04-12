@@ -6,7 +6,7 @@ module.exports = (req, res, next) => {
     if(token){
         try {
             const decoded = TokenManager.decode(token);
-            if(decoded.userId){
+            if(decoded.userId && decoded.action === 'login'){
                 req.decoded = decoded;
                 next();
             } else{

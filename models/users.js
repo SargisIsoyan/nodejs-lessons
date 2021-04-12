@@ -4,10 +4,12 @@ const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
 const UsersSchema = new Schema({
-    username: {type: String, required: true, unique: true},
+    email: {type: String, required: true, unique: true},
     password: String,
+    resetPassToken: String,
     name: String,
-    image: String
+    image: String,
+    isActive: {type: Boolean, default: false}
 });
 
 module.exports = mongoose.model('Users', UsersSchema);
