@@ -12,7 +12,7 @@ class AuthCtrl {
             userId: user._id,
             action: 'register'
         }, 3600);
-        await emailManager(user.email, 'Thank you for registration',
+        await emailManager.sendEmail(user.email, 'Thank you for registration',
             `<a href="http://localhost:3000/activate.html?token=${token}">Activate profile</a>`
         );
     }
@@ -27,7 +27,7 @@ class AuthCtrl {
                 action: 'reset'
             }, 3600);
 
-            await emailManager(user.email, 'Reset Pass',
+            await emailManager.sendEmail(user.email, 'Reset Pass',
                 `<a href="http://localhost:3000/reset-pass.html?token=${token}">Reset Password</a>`
             );
 

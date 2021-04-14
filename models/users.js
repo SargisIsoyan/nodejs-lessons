@@ -9,7 +9,14 @@ const UsersSchema = new Schema({
     resetPassToken: String,
     name: String,
     image: String,
-    isActive: {type: Boolean, default: false}
+    isActive: {type: Boolean, default: true},
+    friends: [{
+        id: {type: ObjectId, ref: 'Users'},
+        name: String,
+        image: String
+    }],
+    sentFriendRequests: [{type: ObjectId, ref: 'Users'}],
+    friendRequests: [{type: ObjectId, ref: 'Users'}]
 });
 
 module.exports = mongoose.model('Users', UsersSchema);

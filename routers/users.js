@@ -16,21 +16,26 @@ const ResponseManager = require('../managers/response_manager');
 const {check, body} = require('express-validator');
 const validationResult = require('../middlewares/validation_result');
 const responseHandler = require('../middlewares/response-handler');
+const validateToken = require('../middlewares/validate-token');
 
 
-router.route('/').get(async (req, res) => {
-    const options = {};
-    if (req.query.name) {
-        options.name = req.query.name;
+router.route('/').get(
+    responseHandler,
+    validateToken,
+    validationResult,
+    async (req, res) => {
+        try {
+            const {name} = req.query;
+            const users = await UsersCtrl.getAll({
+                name,
+                userId: req.decoded.userId
+            });
+            res.onSuccess(users);
+        } catch (e) {
+            res.onError(e);
+        }
     }
-    const users = await Users.find(options);
-
-    // if (req.query.limit) {
-    //     users = users.slice(0, req.query.limit);
-    // }
-
-    res.json(users);
-}).post(
+).post(
     responseHandler,
     upload.single('image'),
     check('username').custom(value => {
@@ -50,7 +55,40 @@ router.route('/').get(async (req, res) => {
         } catch (e) {
             res.onError(e);
         }
-    });
+    }
+);
+
+router.route('/friend-request').get(
+    responseHandler,
+    validateToken,
+    validationResult,
+    async (req, res) => {
+        try {
+            const requests = await UsersCtrl.getFriendRequests({
+                userId: req.decoded.userId
+            });
+            res.onSuccess(requests);
+        } catch (e) {
+            res.onError(e);
+        }
+    }
+).post(
+    responseHandler,
+    validateToken,
+    body('requestedUserId').exists(),
+    validationResult,
+    async (req, res) => {
+        try {
+            await UsersCtrl.acceptFriendRequest({
+                userId: req.decoded.userId,
+                requestedUserId: req.body.requestedUserId
+            });
+            res.onSuccess();
+        } catch (e) {
+            res.onError(e);
+        }
+    }
+);
 
 router.route('/:id').get(async (req, res) => {
     const responseHandler = ResponseManager.getResponseHandler(res);
@@ -83,5 +121,22 @@ router.route('/:id').get(async (req, res) => {
         success: true
     });
 });
+
+router.route('/:id/friend-request').post(
+    responseHandler,
+    validateToken,
+    validationResult,
+    async (req, res) => {
+        try {
+            await UsersCtrl.friendRequest({
+                userId: req.decoded.userId,
+                requestedUserId: req.params.id
+            });
+            res.onSuccess();
+        } catch (e) {
+            res.onError(e);
+        }
+    }
+);
 
 module.exports = router;

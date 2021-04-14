@@ -25,12 +25,92 @@ class UsersCtrl {
         return Users.findOne(options);
     }
 
-    update() {
+    async friendRequest(data) {
+        const {userId, requestedUserId} = data;
+        const [currentUser, requestedUser] = await Promise.all([
+            Users.findById(userId),
+            Users.findById(requestedUserId)
+        ]);
 
+        if (!currentUser || !requestedUser) {
+            throw new AppError('Bad request', 403);
+        }
+        if (
+            currentUser.sentFriendRequests.includes(requestedUserId)
+            || currentUser.friendRequests.includes(requestedUserId)
+            || currentUser.friends.some(user => user.id === requestedUserId)
+        ) {
+            throw new AppError('Bad request', 403);
+        }
+        currentUser.sentFriendRequests.push(requestedUserId);
+        requestedUser.friendRequests.push(userId);
+
+        return Promise.all([
+            currentUser.save(),
+            requestedUser.save()
+        ]);
     }
 
-    getAll() {
+    async acceptFriendRequest(data) {
+        const {userId, requestedUserId} = data;
+        const [currentUser, requestedUser] = await Promise.all([
+            Users.findById(userId),
+            Users.findById(requestedUserId)
+        ]);
 
+        if (!currentUser || !requestedUser) {
+            throw new AppError('Bad request', 403);
+        }
+
+        if (currentUser.friendRequests.includes(requestedUserId)
+            && requestedUser.sentFriendRequests.includes(userId)
+        ) {
+            currentUser.friendRequests.pull(requestedUserId);
+            requestedUser.sentFriendRequests.pull(userId);
+
+            currentUser.friends.push({
+                id: requestedUserId,
+                name: requestedUser.name,
+                image: requestedUser.name,
+            });
+            requestedUser.friends.push({
+                id: userId,
+                name: currentUser.name,
+                image: currentUser.name,
+            });
+
+            return Promise.all([
+                currentUser.save(),
+                requestedUser.save()
+            ]);
+        }
+        throw new AppError('Bad request', 403);
+    }
+
+    async getFriendRequests(data) {
+        const {userId} = data;
+        const currentUser = await Users.findById(userId).populate('friendRequests');
+
+        if (!currentUser) {
+            throw new AppError('Bad request', 403);
+        }
+
+        return currentUser.friendRequests;
+    }
+
+    async getAll(data) {
+        const options = {
+            $and: [{
+                _id: {$ne: data.userId}
+            }]
+        };
+        if (data.name) {
+            options.$and.push({
+                name: new RegExp(data.name, 'i')
+            });
+        }
+
+        return Users.find(options);
     }
 }
 
