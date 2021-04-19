@@ -2,6 +2,7 @@ const http = require('http');
 const cors = require('cors');
 const express = require('express');
 const router = require('./router');
+const socket = require('./socket');
 const mongoose = require('mongoose');
 
 const app = express();
@@ -22,6 +23,7 @@ mongoose.connect('mongodb://localhost/nodejs-lesson', {
     useCreateIndex: true
 }).then(() => {
     server.listen(2021);
+    socket(server);
 });
 mongoose.set('useCreateIndex', true);
 

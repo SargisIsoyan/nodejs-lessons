@@ -98,6 +98,17 @@ class UsersCtrl {
         return currentUser.friendRequests;
     }
 
+    async getFriends(data) {
+        const {userId} = data;
+        const currentUser = await Users.findById(userId);
+
+        if (!currentUser) {
+            throw new AppError('Bad request', 403);
+        }
+
+        return currentUser.friends;
+    }
+
     async getAll(data) {
         const options = {
             $and: [{

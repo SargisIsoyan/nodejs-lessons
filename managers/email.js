@@ -1,5 +1,4 @@
 const nodemailer = require('nodemailer');
-const config = require('../configs/email');
 
 class Transporter {
     constructor() {

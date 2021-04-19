@@ -58,6 +58,22 @@ router.route('/').get(
     }
 );
 
+router.route('/friends').get(
+    responseHandler,
+    validateToken,
+    validationResult,
+    async (req, res) => {
+        try {
+            const friends = await UsersCtrl.getFriends({
+                userId: req.decoded.userId
+            });
+            res.onSuccess(friends);
+        } catch (e) {
+            res.onError(e);
+        }
+    }
+);
+
 router.route('/friend-request').get(
     responseHandler,
     validateToken,
