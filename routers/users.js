@@ -17,6 +17,7 @@ const {check, body} = require('express-validator');
 const validationResult = require('../middlewares/validation_result');
 const responseHandler = require('../middlewares/response-handler');
 const validateToken = require('../middlewares/validate-token');
+const Roles = require('../configs/roles');
 
 
 router.route('/').get(
@@ -60,7 +61,6 @@ router.route('/').get(
 
 router.route('/friends').get(
     responseHandler,
-    validateToken,
     validationResult,
     async (req, res) => {
         try {

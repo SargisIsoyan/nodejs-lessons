@@ -5,6 +5,7 @@ const responseHandler = require('../middlewares/response-handler');
 const validateToken = require('../middlewares/validate-token');
 const Posts = require('../models/posts');
 const Users = require('../models/users');
+const Roles = require('../configs/roles');
 
 router.route('/').get(async (req, res) => {
     const posts = await Posts.find().populate({
@@ -14,7 +15,7 @@ router.route('/').get(async (req, res) => {
     res.json(posts);
 }).post(
     responseHandler,
-    validateToken,
+    validateToken([Roles.admin, Roles.moderator]),
     async (req, res) => {
         if (!(await Users.exists({_id: req.decoded.userId}))) {
             throw new Error('User not found');

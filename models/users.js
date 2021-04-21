@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Roles = require('../configs/roles');
 
 const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
@@ -16,7 +17,8 @@ const UsersSchema = new Schema({
         image: String
     }],
     sentFriendRequests: [{type: ObjectId, ref: 'Users'}],
-    friendRequests: [{type: ObjectId, ref: 'Users'}]
+    friendRequests: [{type: ObjectId, ref: 'Users'}],
+    role: {type: String, enum: Object.values(Roles), default: 'user'}
 });
 
 module.exports = mongoose.model('Users', UsersSchema);

@@ -41,6 +41,22 @@ router.post(
 );
 
 router.post(
+    '/login-admin',
+    responseHandler,
+    body('email').exists(),
+    body('password').exists(),
+    validationResult,
+    async (req, res) => {
+        try {
+            const token = await AuthCtrl.adminLogin(req.body);
+            res.onSuccess(token);
+        } catch (e) {
+            res.onError(e);
+        }
+    }
+);
+
+router.post(
     '/activate',
     responseHandler,
     body('token').exists(),

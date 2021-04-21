@@ -4,7 +4,7 @@ const Bcrypt = require('../managers/bcrypt');
 
 class UsersCtrl {
     async add(data) {
-        const {email, name, file, password} = data;
+        const {email, name, file, password, role} = data;
         if (await Users.exists({email})) {
             throw new AppError('User exists', 400);
         }
@@ -13,7 +13,7 @@ class UsersCtrl {
         user.password = await Bcrypt.hash(password);
         user.image = file?.path;
         user.name = name;
-
+        user.role = role;
         return user.save();
     }
 

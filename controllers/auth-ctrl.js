@@ -3,8 +3,22 @@ const AppError = require('../managers/app_error');
 const Bcrypt = require('../managers/bcrypt');
 const TokenManager = require('../managers/token-manager');
 const emailManager = require('../managers/email');
+const Roles = require('../configs/roles');
 
 class AuthCtrl {
+    async generateAdmin(){
+        try {
+            await UserCtrl.add({
+                name: 'admin',
+                email: 'admin',
+                password: '123456',
+                role: 'admin'
+            });
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
     async register(data) {
         const user = await UserCtrl.add(data);
 
@@ -48,7 +62,26 @@ class AuthCtrl {
             }
             return TokenManager.encode({
                 userId: user._id,
-                action: 'login'
+                action: 'login',
+                role: user.role
+            });
+        }
+
+        throw new AppError('Username or password is invalid', 401);
+    }
+
+    async adminLogin(data) {
+        const {email, password} = data;
+        const user = await UserCtrl.getOne({email});
+
+        if (user && await Bcrypt.compare(password, user.password)) {
+            if (!user.isActive || ![Roles.admin, Roles.moderator].includes(user.role)) {
+                throw new AppError('Permission denied', 401);
+            }
+            return TokenManager.encode({
+                userId: user._id,
+                action: 'login',
+                role: user.role
             });
         }
 
