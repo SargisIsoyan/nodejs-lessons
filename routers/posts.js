@@ -30,6 +30,22 @@ router.route('/').get(async (req, res) => {
         res.onSuccess(post);
     }
 );
+router.route('/:id/comments').get().post();
+router.route('/:id/comments/:comm_id').get((req, res) => {
+    res.end('get ' + req.params.id);
+}).put((req, res) => {
+    res.end('editing ' + req.params.id);
+}).delete((req, res) => {
+    res.end('deleting ' + req.params.id);
+});
+router.route('/:id/comments/:comm_id/likes').get().post();
+router.route('/:id/comments/:comm_id/likes/:like_id').get((req, res) => {
+    res.end('get ' + req.params.id);
+}).put((req, res) => {
+    res.end('editing ' + req.params.id);
+}).delete((req, res) => {
+    res.end('deleting ' + req.params.id);
+});
 
 router.route('/:id').get((req, res) => {
     res.end('get ' + req.params.id);

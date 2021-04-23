@@ -1,32 +1,48 @@
 //1. Գրել ծրագիր որ թույլ կտա վերբեռնել ֆայլ և պահպանել Homework պապկայի upload պապակայում ՝
 // պահպանելիս ընտրել պատահական 6-անիշ թվերից կազմված անուն:
 const express = require('express');
-const random = require('random');
-const fs = require('fs');
-const path = require('path');
-const multer = require('multer');
-const mime = require('mime-types');
-
+const responseHandler = require('../middlewares/response-handler');
+const validateToken = require('../middlewares/validate-token');
+const validationResult = require('../middlewares/validation_result');
+const ImagesCtrl = require('../controllers/images.ctrl');
+const upload = require('../middlewares/upload');
+const Roles = require('../configs/roles');
+const {body} = require('express-validator');
 const router = express.Router();
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'test/');
-    },
-    filename: function (req, file, cb) {
-        console.log(file);
-        cb(null, random.int(1e5, 1e6) + '.' + file.originalname.split('.').pop());
+
+router.route('/').post(
+    upload.single('image'),
+    responseHandler,
+    validateToken([Roles.admin, Roles.moderator]),
+    body('title'),
+    body('description'),
+    validationResult,
+    async (req, res) => {
+        try {
+            const image = await ImagesCtrl.add({
+                image: req.file ? req.file.filename: undefined,
+                userId: req.decoded.userId,
+                title: req.body.title,
+                description: req.body.description
+            });
+            res.onSuccess(image);
+        } catch (e){
+            res.onError(e);
+        }
     }
-});
-
-const upload = multer({dest: 'test/'});
-
-router.post('/', upload.single('file'), (req, res) => {
-    res.json(req.file);
-});
-
-router.get('/:name', upload.single('file'), (req, res) => {
-    fs.createReadStream(path.join(__homedir, 'upload', req.params.name)).pipe(res);
-});
+).get(
+    responseHandler,
+    validateToken([Roles.admin, Roles.moderator]),
+    validationResult,
+    async (req, res) => {
+        try {
+            const images = await ImagesCtrl.getAll();
+            res.onSuccess(images);
+        } catch (e){
+            res.onError(e);
+        }
+    }
+);
 
 module.exports = router;
