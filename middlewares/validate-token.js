@@ -1,9 +1,8 @@
 const AppError = require('../managers/app_error');
 const TokenManager = require('../managers/token-manager');
 
-
-module.exports = (roles, ...params) => {
-    const validator = (req, res, next) => {
+module.exports = (roles) => {
+    return (req, res, next) => {
         const token = req.headers['token'] || req.query['token'] || req.body['token'];
         if (token) {
             try {
@@ -29,10 +28,6 @@ module.exports = (roles, ...params) => {
         } else {
             res.onError(new AppError('Auth error', 401));
         }
-    }
-
-    if (params.length > 1) {
-        return validator(roles, params[0], params[1]);
-    }
-    return validator;
+    };
 }
+

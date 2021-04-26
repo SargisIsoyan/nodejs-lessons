@@ -16,6 +16,7 @@ const UsersSchema = new Schema({
         name: String,
         image: String
     }],
+    images:[String],
     sentFriendRequests: [{type: ObjectId, ref: 'Users'}],
     friendRequests: [{type: ObjectId, ref: 'Users'}],
     role: {type: String, enum: Object.values(Roles), default: 'user'}

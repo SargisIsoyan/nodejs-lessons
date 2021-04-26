@@ -22,7 +22,7 @@ const Roles = require('../configs/roles');
 
 router.route('/').get(
     responseHandler,
-    validateToken,
+    validateToken(),
     validationResult,
     async (req, res) => {
         try {
@@ -90,7 +90,7 @@ router.route('/friend-request').get(
     }
 ).post(
     responseHandler,
-    validateToken,
+    validateToken(),
     body('requestedUserId').exists(),
     validationResult,
     async (req, res) => {
@@ -140,7 +140,7 @@ router.route('/:id').get(async (req, res) => {
 
 router.route('/:id/friend-request').post(
     responseHandler,
-    validateToken,
+    validateToken(),
     validationResult,
     async (req, res) => {
         try {

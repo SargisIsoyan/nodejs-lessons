@@ -105,7 +105,7 @@ router.post(
 router.post(
     '/init-session',
     responseHandler,
-    validateToken,
+    validateToken(),
     async (req, res) => {
         try {
             const user = await UserCtrl.getById(req.decoded.userId)
